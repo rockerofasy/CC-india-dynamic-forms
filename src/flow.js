@@ -42,9 +42,7 @@ const formatData = (data) => {
 
 
 
-
 let sheetData = {};
-
 export const getNextScreen = async (decryptedBody) => {
     const { screen, data, version, action, flow_token } = decryptedBody;
 
@@ -72,66 +70,122 @@ export const getNextScreen = async (decryptedBody) => {
     // handle initial request when opening the flow
     if (action === "INIT") {
 
-
         try {
             sheetData = await fetchSheetData();
         } catch (error) {
             console.error('Failed to fetch sheet data:', error);
             throw new Error('Failed to fetch sheet data');
         }
-
         return {
-            ...sheetData,
             version,
             screen: "MY_FIRST_SCREEN",
-            data: sheetData,
+            data: {
+                ...sheetData,
+                isCityEnabled: false,
+                isUniversityEnabled: false,
+                isTenancyEnabled: false,
+                isBudgetEnabled: false,
+            }
         };
     }
 
     if (action === "data_exchange") {
-        // handle the request based on the current screen
+
         switch (screen) {
             case "MY_FIRST_SCREEN":
-                // TODO: process flow input data
+                // Process flow input data based on trigger
+                switch (data?.trigger) {
+                    case "country_selected":
+                        console.log(sheetData);
+                        console.log(data)
+
+                        return {
+                            version,
+                            screen: "MY_FIRST_SCREEN",
+                            data: {
+                                ...sheetData,
+                                city: [{ "id": "0", "title": "ankit ki city" }],
+
+                                flow_token,
+                                isCityEnabled: true,
+                            }
+                        };
+                    case "city_selected":
+
+                        return {
+                            version,
+                            screen: "MY_FIRST_SCREEN",
+                            data: {
+                                ...sheetData,
+
+                                flow_token,
+                                isUniversityEnabled: true,
+                            }
+                        };
+                    case "university_selected":
+                        return {
+                            version,
+                            screen: "MY_FIRST_SCREEN",
+                            data: {
+                                ...sheetData,
+
+                                flow_token,
+                                isTenancyEnabled: true,
+                            }
+                        };
+                    case "tenancy_selected":
+                        return {
+                            version,
+                            screen: "MY_FIRST_SCREEN",
+                            data: {
+                                ...sheetData,
+
+                                flow_token,
+                                isBudgetEnabled: true,
+                            }
+                        };
+                    case "budget_selected":
+                        return {
+                            version,
+                            screen: "MY_FIRST_SCREEN",
+                            data: {
+                                flow_token,
+
+                            }
+                        };
+                    default:
+                        break;
+                }
 
                 console.log("screen 1 data ----");
-
                 console.log(data);
+                console.log("----------------------");
 
-                console.log("----------------------")
+                const selectedData = data.data;
 
+                sheetData = await fetchSheetData();
+                console.log("sheetdtaa--", data);
 
-                console.log(data.country);
-                console.log(data.city);
-                console.log(data.university);
-                console.log(data.tenancy);
-                console.log(data.budget);
-                console.log("----------------------")
-                const countryName =
-                    sheetData.country.find(
-                        (x) => x.id === data.country
-                    ).title;
-                const cityName = sheetData.city.find(
-                    (x) => x.id === data.city
-                ).title;
-                const universityName = sheetData.university.find(
-                    (x) => x.id === data.university
-                ).title;
-                const tenancyName = sheetData.tenancy.find(
-                    (x) => x.id === data.tenancy
-                ).title;
-                const budgetName = sheetData.budget.find(
-                    (x) => x.id === data.budget
-                ).title;
-                console.log("----------------------")
+                const country = sheetData.country.find((x) => x.id === selectedData?.country);
+                const city = sheetData.city.find((x) => x.id === selectedData?.city);
+                const university = sheetData.university.find((x) => x.id === selectedData?.university);
+                const tenancy = sheetData.tenancy.find((x) => x.id === selectedData?.tenancy);
+                const budget = sheetData.budget.find((x) => x.id === selectedData?.budget);
+
+                const countryName = country ? country.title : "Unknown Country";
+                const cityName = city ? city.title : "Unknown City";
+                const universityName = university ? university.title : "Unknown University";
+                const tenancyName = tenancy ? tenancy.title : "Unknown Tenancy";
+                const budgetName = budget ? budget.title : "Unknown Budget";
+
+                console.log("----------------------");
                 console.log(countryName);
                 console.log(cityName);
                 console.log(universityName);
                 console.log(tenancyName);
                 console.log(budgetName);
-                console.log("----------------------")
+                console.log("----------------------");
 
-                // send success response to complete and close the flow
                 return {
                     version,
                     screen: "MY_SECOND_SCREEN",
@@ -144,30 +198,20 @@ export const getNextScreen = async (decryptedBody) => {
                         budget: budgetName,
                     },
                 };
+
+            // ---------------------------------------------------------------------------
+
+
             case "MY_SECOND_SCREEN":
-                // TODO: process flow input data
                 // Find the corresponding titles for the selected IDs
 
-
-
-
-                // send success response to complete and close the flow
                 return {
-
-
                     version,
                     screen: "SUCCESS",
                     data: {
                         flow_token,
-                        country: countryName,
-                        city: cityName,
-                        university: universityName,
-                        tenancy: tenancyName,
-                        budget: budgetName,
-
                     },
                 };
-
 
             default:
                 break;
