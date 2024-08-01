@@ -1,9 +1,11 @@
 // sendFlow.js
 
 import fetch from 'node-fetch';
-
+let phoneNumber = "";
 
 const sendFlowMessage = async (flow_token, phone_number) => {
+    phoneNumber = phone_number;
+
     const fbUrl = 'https://graph.facebook.com/v18.0/258868947301783/messages';
     const fbHeaders = {
         'Content-Type': 'application/json',

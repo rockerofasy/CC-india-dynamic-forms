@@ -1,4 +1,13 @@
+import fetchUserNs from "./fetchUserNs.js";
+import phoneNumber from "./sendFlow.js";
+import { getPhoneNumber, getUserNS } from "./sharedState.js"
+import { updateAndSend } from "./updatenSend.js"
+
+
+
+
 let sheetData = {};
+
 
 const fetchSheetData = async () => {
   const response = await fetch(
@@ -84,48 +93,66 @@ export const getNextScreen = async (decryptedBody) => {
             };
 
           default:
-            const selectedData = data.data;
-
-            sheetData = await fetchSheetData();
-
-            const city = sheetData.city.find((x) => x.id === selectedData?.city);
-            const category = sheetData.category.find(
-              (x) => x.id === selectedData?.category
-            );
-
-            cityName = city ? city.title : "Unknown Country";
-            categoryName = category ? category.title : "Unknown City";
-            
-
-            
-
-
-            console.log("----------------------");
-            console.log(cityName);
-            console.log(categoryName);
-            console.log("----------------------");
-
-            return {
-              version,
-              screen: "SUCCESS",
-              data: {
-                "extension_message_response": {
-                  "params": {
-                    flow_token,
-
-                  }
-                }
-
-              }
-            };
+            break;
 
         }
 
-
-      // ---------------------------------------------------------------------------
-
-      // Find the corresponding titles for the selected IDs
     }
+
+
+    const selectedData = data.data;
+
+    sheetData = await fetchSheetData();
+
+    const city = sheetData.city.find((x) => x.id === selectedData?.city);
+    const category = sheetData.category.find(
+      (x) => x.id === selectedData?.category
+    );
+
+    cityName = city ? city.title : "Unknown Country";
+    categoryName = category ? category.title : "Unknown City";
+
+
+
+
+
+    console.log("----------------------");
+
+    console.log("cityName: " + cityName);
+    console.log("categoryName: " + categoryName);
+    let user_ns = getUserNS()
+    console.log("----------------------");
+
+
+    await updateAndSend(user_ns, cityName, categoryName);
+
+
+
+
+
+
+
+
+
+
+    return {
+      version,
+      screen: "SUCCESS",
+      data: {
+        "extension_message_response": {
+          "params": {
+            flow_token,
+
+          }
+        }
+
+      }
+    };
+
+
+
+
+
   }
 
   console.error("Unhandled request body:", decryptedBody);

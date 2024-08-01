@@ -2,6 +2,8 @@
 
 import fetch from 'node-fetch';
 
+
+
 const fetchUserNs = async (phone_number) => {
     const url = `https://chat.gappa.io/api/subscriber/get-info-by-user-id?user_id=${phone_number}`;
     const headers = {

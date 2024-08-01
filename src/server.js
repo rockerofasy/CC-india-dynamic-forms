@@ -12,7 +12,9 @@ import {
 import { getNextScreen } from "./flow.js";
 // import crypto from "crypto";
 import sendFlowMessage from './sendFlow.js';
-import fetchUserNs from "./fetchUserNs.js";
+import { setPhoneNumber, setUserNS } from "./sharedState.js"
+import fetchUserNs from "./fetchUserNs.js"
+
 
 const app = express();
 
@@ -64,8 +66,10 @@ app.post("/send-flow-message", async (req, res) => {
   }
 
   try {
-    const userNs = await fetchUserNs(phone_number);
-    console.log(userNs)
+
+    const ns = await fetchUserNs(phone_number);
+    setPhoneNumber(phone_number);
+    setUserNS(ns);
     const result = await sendFlowMessage(flow_token, phone_number);
     res.status(200).send(result);
   } catch (error) {
